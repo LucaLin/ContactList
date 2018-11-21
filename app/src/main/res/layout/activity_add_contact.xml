@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.r30_a.contactlist.AddContactActivity">
+
+    <LinearLayout
+        android:id="@+id/ContactLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="false"
+        android:layout_centerHorizontal="false"
+        android:layout_marginBottom="10dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <EditText
+            android:id="@+id/edtContactName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/edtPhoneNumber"
+            android:layout_alignParentEnd="false"
+            android:ems="10"
+            android:hint="輸入姓名"
+            android:inputType="textPersonName" />
+
+        <EditText
+            android:id="@+id/edtPhoneNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/btnToAddContact"
+            android:layout_alignParentStart="false"
+            android:ems="10"
+            android:hint="輸入電話"
+            android:inputType="phone" />
+
+        <Button
+            android:id="@+id/btnToAddContact"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="false"
+            android:layout_centerHorizontal="false"
+            android:text="新增" />
+    </LinearLayout>
+
+
+</RelativeLayout>

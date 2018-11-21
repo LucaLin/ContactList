@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">ContactList</string>
+
+    <string name="ContactName">名字</string>
+    <string name="ContactPhone">手機</string>
+    <string name="dial">撥號</string>
+    <string name="deleteData">刪除聯絡人</string>
+
+    <string name="alertTitle">"選取清單"</string>
+    <string name="scope">"請選擇要顯示的範圍"</string>
+    <string name="sim">僅限sim卡</string>
+    <string name="allData">所有資料</string>
+    <string name="noData">sorry！找不到sim卡資料喔</string>
+    <string name="wrongInput">"oops!名稱或電話格式有誤喔！"</string>
+    <string name="addSuccess">"已新增成功至通訊錄！！"</string>
+
 </resources>
