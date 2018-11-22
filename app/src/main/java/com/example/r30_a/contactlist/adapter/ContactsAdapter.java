@@ -1,11 +1,14 @@
 package com.example.r30_a.contactlist.adapter;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+
+import com.example.r30_a.contactlist.ContactData;
 import com.example.r30_a.contactlist.R;
 import java.util.ArrayList;
 import java.util.Map;
@@ -18,11 +21,11 @@ import java.util.Map;
 public class ContactsAdapter extends BaseAdapter{
 
     TextView txvName, txvNum;
-    ArrayList<Map<String, Object>> list;
+    ArrayList<ContactData> list;
     Context context;
     LayoutInflater inflater;
 
-    public ContactsAdapter(Context context, ArrayList<Map<String, Object>> list) {
+    public ContactsAdapter(Context context, ArrayList<ContactData> list) {
 
         this.context = context;
         inflater = LayoutInflater.from(context);
@@ -52,8 +55,8 @@ public class ContactsAdapter extends BaseAdapter{
         txvNum = view.findViewById(R.id.txvContactsNumber);
         txvName = view.findViewById(R.id.txvContactName);
 
-        txvName.setText(list.get(position).get(R.string.ContactName).toString());
-        txvNum.setText(list.get(position).get(R.string.ContactPhone).toString());
+        txvName.setText((list.get(position).getName()).toString());
+        txvNum.setText(list.get(position).getPhoneNum().toString());
 
         return view;
     }

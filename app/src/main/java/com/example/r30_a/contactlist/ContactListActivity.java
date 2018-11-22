@@ -30,12 +30,13 @@ public class ContactListActivity extends AppCompatActivity {
 
     Button btnToAddContact;
     Toast toast;
-    ArrayList readContactList;//聯絡人清單表
+    ArrayList<ContactData> readContactList;//聯絡人清單表
     ListView myContactList;
     ContactsAdapter adapter;
     LinearLayout contactLayout;
     private Cursor cursor;//搜尋資料的游標
     private HashMap contactMap =new HashMap();//用來儲存資料的物件
+    private ContactData contactData;
     public static final String SIM_CONTACT = "content://icc/adn";//讀取sim卡資料的uri string
     String[] phoneNumberProjection = new String[]{//欲搜尋的欄位區塊
             ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
@@ -51,12 +52,13 @@ public class ContactListActivity extends AppCompatActivity {
 
         myContactList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
         @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            final String phoneTel = readContactList.get(position).toString();
+        public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+            final String phoneTel = readContactList.get(position).getPhoneNum();
             AlertDialog.Builder builder = new AlertDialog.Builder(ContactListActivity.this);
             builder.setPositiveButton(R.string.dial, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
+
                     Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + phoneTel));
                     if (ActivityCompat.checkSelfPermission(ContactListActivity.this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
                         return;
@@ -67,7 +69,7 @@ public class ContactListActivity extends AppCompatActivity {
                     .setNeutralButton(R.string.deleteData, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-
+                            deleteContact(readContactList.get(position).getId());
                         }
                     }).create();
             builder.show();
@@ -83,10 +85,36 @@ public class ContactListActivity extends AppCompatActivity {
         });
     }
 
+    private void deleteContact(String id) {
+        try {
+            Uri uri = Uri.parse("content://com.android.contacts/raw_contacts");
+            //使用id來找原始資料
+            Cursor c = this.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                    phoneNumberProjection,
+                    "contact_id =?",
+                    new String[]{id},
+                    null);
+            if(c.moveToFirst()){
+
+                this.getContentResolver().delete(uri,"contact_id =?", new String[]{id});
+                toast.setText(R.string.deleteOK);toast.show();
+                setAdapter(MainActivity.type);
+                }
+             }
+        catch(Exception e){
+                e.getMessage();
+            }
+        }
+
     @Override
     protected void onResume() {
         super.onResume();
-        if(MainActivity.type == 0){//只顯示sim卡資料
+        setAdapter(MainActivity.type);
+    }
+
+    //獲取聯絡人清單資料
+    private void setAdapter(int type) {
+        if(type == 0){//只顯示sim卡資料
             adapter = new ContactsAdapter(this, getContactList(Uri.parse(SIM_CONTACT), phoneNumberProjection, 0, 1));
         }else {//全部顯示
             adapter = new ContactsAdapter(this, getContactList(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, phoneNumberProjection, 2, 1));
@@ -128,11 +156,12 @@ public class ContactListActivity extends AppCompatActivity {
         formatPhoneNum = getFormatPhone(phoneNumber);
 
         if(!tempId.equals(id)){
-            contactMap= new HashMap();
-            contactMap.put(R.string.ContactName, name);
-            contactMap.put(R.string.ContactPhone, formatPhoneNum);
+            contactData = new ContactData();
+            contactData.setId(id);
+            contactData.setName(name);
+            contactData.setPhoneNum(formatPhoneNum);
             tempId = id;
-            readContactList.add(contactMap);
+            readContactList.add(contactData);
         }
     }
 

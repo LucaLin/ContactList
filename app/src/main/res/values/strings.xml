@@ -5,6 +5,7 @@
     <string name="ContactPhone">手機</string>
     <string name="dial">撥號</string>
     <string name="deleteData">刪除聯絡人</string>
+    <string name="deleteOK">刪除成功</string>
 
     <string name="alertTitle">"選取清單"</string>
     <string name="scope">"請選擇要顯示的範圍"</string>
