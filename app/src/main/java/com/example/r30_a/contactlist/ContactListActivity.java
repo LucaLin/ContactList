@@ -2,6 +2,7 @@ package com.example.r30_a.contactlist;
 
 import android.Manifest;
 import android.app.Instrumentation;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -86,6 +87,7 @@ public class ContactListActivity extends AppCompatActivity {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 Intent intent = new Intent();
+                                intent.putExtra("id",readContactList.get(position).getId());
                                 intent.putExtra("name", readContactList.get(position).getName());
                                 intent.putExtra("phone", phoneTel);
                                 intent.setClass(ContactListActivity.this, UpdateDataActivity.class);
@@ -242,13 +244,36 @@ public class ContactListActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//            data = getIntent();
-        String s = data.getStringExtra("Name");
+
         if (requestCode == REQUEST_CODE){
 
             if(resultCode == RESULT_OK){
+                String dataid = data.getStringExtra("id");
+                String updateName = data.getStringExtra("Name");
+                String updatePhone = data.getStringExtra("Phone");
 
+                Uri nameUri = Uri.parse("content://com.android.contacts/raw_contacts");
+                Uri numberUri = Uri.parse("content://com.android.contacts/data");
+                //使用id來找原始資料
+                Cursor c = this.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                        phoneNumberProjection,
+                        "contact_id =?",
+                        new String[]{dataid},
+                        null);
+                try{
+                if(c.moveToFirst()){
+
+                    ContentValues values = new ContentValues();
+                    values.put(ContactsContract.CommonDataKinds.Phone.NUMBER,updatePhone);
+                    this.getContentResolver().update(numberUri,values,ContactsContract.CommonDataKinds.Phone.CONTACT_ID+" =" +dataid,null);
+                    values.clear();
+                    values.put(ContactsContract.Contacts.DISPLAY_NAME,updateName);
+                    this.getContentResolver().update(nameUri,values,"contact_id =?",new String[]{dataid});
+                    setAdapter(MainActivity.type);
+                    }
+                }catch (Exception e){
+                    e.getMessage();
+                }
 
             }
         }

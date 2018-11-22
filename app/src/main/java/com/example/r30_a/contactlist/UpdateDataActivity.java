@@ -18,6 +18,7 @@ public class UpdateDataActivity extends AppCompatActivity implements View.OnClic
     Button btnUpdate;
     EditText edtName, edtPhone;
     Toast toast;
+    String dataId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +37,7 @@ public class UpdateDataActivity extends AppCompatActivity implements View.OnClic
         Intent intent = getIntent();
         txvDataName.setText(intent.getStringExtra("name"));
         txvDataPhone.setText(intent.getStringExtra("phone"));
+        dataId = intent.getStringExtra("id");
         edtName = (EditText)findViewById(R.id.edtContactName);
         edtPhone = (EditText)findViewById(R.id.edtPhoneNumber);
     }
@@ -58,6 +60,7 @@ public class UpdateDataActivity extends AppCompatActivity implements View.OnClic
                         public void onClick(DialogInterface dialog, int which) {
 
                             Intent intent = new Intent();
+                            intent.putExtra("id",dataId);
                             intent.putExtra("Name",updateName);
                             intent.putExtra("Phone",updatePhone);
                             intent.setClass(UpdateDataActivity.this,ContactListActivity.class);
