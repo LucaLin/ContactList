@@ -1,11 +1,19 @@
 <resources>
     <string name="app_name">ContactList</string>
-
+    <string name="hint">提示</string>
+    <string name="sureToUpdate">確定要更新嗎?</string>
+    <string name="noUpdate">未有更新資料！請重新輸入</string>
     <string name="ContactName">名字</string>
     <string name="ContactPhone">手機</string>
-    <string name="dial">撥號</string>
-    <string name="deleteData">刪除聯絡人</string>
+    <string name="dial">打給他/她</string>
+    <string name="deleteData">刪掉他/她</string>
     <string name="deleteOK">刪除成功</string>
+    <string name="chooseFunction">"請選擇功能"</string>
+    <string name="updateData">更新</string>
+    <string name="updateDataOK">更新成功</string>
+    <string name="updateTo">更改為</string>
+    <string name="yes">確定</string>
+    <string name="no">取消</string>
 
     <string name="alertTitle">"選取清單"</string>
     <string name="scope">"請選擇要顯示的範圍"</string>

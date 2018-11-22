@@ -31,14 +31,14 @@
             android:id="@+id/edtPhoneNumber"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/btnToAddContact"
+            android:layout_above="@+id/btnUpdate"
             android:layout_alignParentStart="false"
             android:ems="10"
             android:hint="輸入電話"
             android:inputType="phone" />
 
         <Button
-            android:id="@+id/btnToAddContact"
+            android:id="@+id/btnUpdate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="false"

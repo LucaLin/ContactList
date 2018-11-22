@@ -28,7 +28,7 @@ public class AddContactActivity extends AppCompatActivity {
 
         edtName = (EditText)findViewById(R.id.edtContactName);
         edtPhomeNumber = (EditText)findViewById(R.id.edtPhoneNumber);
-        btnAddContact = (Button)findViewById(R.id.btnToAddContact);
+        btnAddContact = (Button)findViewById(R.id.btnUpdate);
         btnAddContact.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
