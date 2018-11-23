@@ -1,6 +1,7 @@
 package com.example.r30_a.contactlist;
 
 import android.Manifest;
+import android.content.ContentResolver;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.Contacts;
@@ -11,7 +12,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
-import android.provider.ContactsContract;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +24,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.r30_a.contactlist.adapter.ContactsAdapter;
+import com.example.r30_a.contactlist.model.ContactData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,12 +35,12 @@ public class ContactListActivity extends AppCompatActivity {
 
     Button btnToAddContact;
     Toast toast;
-    ArrayList<ContactData> readContactList;//聯絡人清單表
-    ListView myContactList;
+    ArrayList<ContactData> myContactList;//聯絡人清單表
+    ListView ContactListView;
     ContactsAdapter adapter;
     private Cursor cursor;//搜尋資料的游標
-    private HashMap contactMap = new HashMap();//用來儲存資料的物件
-    private ContactData contactData;
+    private ContactData contactData;//用來儲存資料的物件
+    private ContentResolver resolver;
     public static final Uri SIM_URI = Uri.parse("content://icc/adn");//讀取sim卡資料的uri string
     String[] phoneNumberProjection = new String[]{//欲搜尋的欄位區塊
             Phone.CONTACT_ID,
@@ -54,17 +55,17 @@ public class ContactListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_contact_list);
         init();
 
-        myContactList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        ContactListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
 
                 return true;
             }
         });
-        myContactList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        ContactListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, final int position, final long id) {
-                final String phoneTel = readContactList.get(position).getPhoneNum();
+                final String phoneTel = myContactList.get(position).getPhoneNum();
                 AlertDialog.Builder builder = new AlertDialog.Builder(ContactListActivity.this);
                 builder.setNeutralButton(R.string.dial, new DialogInterface.OnClickListener() {
                     @Override
@@ -80,15 +81,15 @@ public class ContactListActivity extends AppCompatActivity {
                         .setPositiveButton(R.string.deleteData, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                deleteContact(readContactList.get(position).getId());
+                                deleteContact(myContactList.get(position).getId(), phoneNumberProjection);
                             }
                         })
                         .setNegativeButton(R.string.updateData, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 Intent intent = new Intent();
-                                intent.putExtra("id",readContactList.get(position).getId());
-                                intent.putExtra("name", readContactList.get(position).getName());
+                                intent.putExtra("id",myContactList.get(position).getId());
+                                intent.putExtra("name", myContactList.get(position).getName());
                                 intent.putExtra("phone", phoneTel);
                                 intent.setClass(ContactListActivity.this, UpdateDataActivity.class);
                                 startActivityForResult(intent, ContactListActivity.REQUEST_CODE);
@@ -108,24 +109,30 @@ public class ContactListActivity extends AppCompatActivity {
         });
     }
 
-    private void deleteContact(String id) {
-        try {
-//            Uri uri = Uri.parse("content://com.android.contacts/raw_contacts");
-            //使用id來找原始資料
-            Cursor c = this.getContentResolver().query(Phone.CONTENT_URI,
-                    phoneNumberProjection,
-                    "contact_id =?",
-                    new String[]{id},
-                    null);
-            if (c.moveToFirst()) {
+    /*刪除聯絡人*/
+    private void deleteContact(String id, String[] projection) {
+        if(ActivityCompat.checkSelfPermission(this,Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED ||
+           ActivityCompat.checkSelfPermission(this,Manifest.permission.WRITE_CONTACTS) == PackageManager.PERMISSION_GRANTED){
+            try {
 
-                this.getContentResolver().delete(RawContacts.CONTENT_URI, "contact_id =?", new String[]{id});
-                toast.setText(R.string.deleteOK);
-                toast.show();
-                setAdapter(MainActivity.type);
+                //使用id來找原始資料
+                Cursor c = resolver.query(Phone.CONTENT_URI,
+                        projection,
+                        "contact_id =?",
+                        new String[]{id},
+                        null);
+                if (c.moveToFirst()) {
+
+                    resolver.delete(RawContacts.CONTENT_URI, "contact_id =?", new String[]{id});
+                    toast.setText(R.string.deleteOK);
+                    toast.show();
+                    setAdapter(MainActivity.type);
+                }
+            } catch (Exception e) {
+                e.getMessage();
             }
-        } catch (Exception e) {
-            e.getMessage();
+        }else {
+            toast.setText(R.string.permissonRequest);toast.show();
         }
     }
 
@@ -142,16 +149,16 @@ public class ContactListActivity extends AppCompatActivity {
         } else {//全部顯示
             adapter = new ContactsAdapter(this, getContactList(Phone.CONTENT_URI, phoneNumberProjection, 2, 1));
         }
-        myContactList.setAdapter(adapter);
+        ContactListView.setAdapter(adapter);
     }
 
     private ArrayList getContactList(Uri uri, String[] projecction, int nameColumn, int numColunm) {
-        readContactList = new ArrayList();
+        myContactList = new ArrayList();
         String name;
-        String phoneNumber;
-        String formatPhoneNum = "";
+        String mobileNum;
+        String format_mobileNum = "";
 
-        cursor = this.getContentResolver().query(uri, projecction, null, null, null);
+        cursor = resolver.query(uri, projecction, null, null, null);
 
         //直接取contacts中的號碼資料區，再從號碼欄去抓對應的name跟number
         if (cursor != null) {
@@ -160,24 +167,24 @@ public class ContactListActivity extends AppCompatActivity {
 
                 String id = cursor.getString(cursor.getColumnIndex(Phone.CONTACT_ID));
                 name = cursor.getString(cursor.getColumnIndex(Phone.DISPLAY_NAME));
-                phoneNumber = cursor.getString(cursor.getColumnIndex(Phone.NUMBER));
-                if (!TextUtils.isEmpty(phoneNumber) && !isCellPhoneNumber(phoneNumber)) {
+                mobileNum = cursor.getString(cursor.getColumnIndex(Phone.NUMBER));
+                if (!TextUtils.isEmpty(mobileNum) && !isCellPhoneNumber(mobileNum)) {
                     continue;
                 } else {
-                    addContactToList(id, phoneNumber, formatPhoneNum, contactMap, name, readContactList);
+                    addContactToList(id, mobileNum, format_mobileNum, name, myContactList);
                 }
             }
             cursor.close();
-            return readContactList;
+            return myContactList;
         } else {
             toast.setText(R.string.noData);
             toast.show();
-            return readContactList;
+            return myContactList;
         }
 
     }
-
-    private void addContactToList(String id, String phoneNumber, String formatPhoneNum, HashMap contactMap, String name, ArrayList readContactList) {
+    /*新增聯絡人到手機清單*/
+    private void addContactToList(String id, String phoneNumber, String formatPhoneNum, String name, ArrayList list) {
         formatPhoneNum = getFormatPhone(phoneNumber);
 
         if (!tempId.equals(id)) {
@@ -186,7 +193,7 @@ public class ContactListActivity extends AppCompatActivity {
             contactData.setName(name);
             contactData.setPhoneNum(formatPhoneNum);
             tempId = id;
-            readContactList.add(contactData);
+            list.add(contactData);
         }
     }
 
@@ -220,7 +227,7 @@ public class ContactListActivity extends AppCompatActivity {
             return isCellPhone;
         }
     }
-
+    /*取得格式化後的電話號碼*/
     private String getFormatPhone(String phoneNumber) {
         //1: 開頭是+886的
         //2： 格式為xxxx-xxx-xxx的
@@ -237,24 +244,25 @@ public class ContactListActivity extends AppCompatActivity {
     }
 
     private void init() {
+        resolver = this.getContentResolver();
         toast = Toast.makeText(this, "", Toast.LENGTH_SHORT);
         btnToAddContact = (Button) findViewById(R.id.btnUpdate);
-        myContactList = (ListView) findViewById(R.id.ContactList);
+        ContactListView = (ListView) findViewById(R.id.ContactList);
 
     }
 
+    //取回更新後的資料，做更新聯絡人的處理
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         if (requestCode == REQUEST_CODE){
-
             if(resultCode == RESULT_OK){
                 String contact_id = data.getStringExtra("id");
                 String updateName = data.getStringExtra("Name");
                 String updatePhone = data.getStringExtra("Phone");
                 String oldName = data.getStringExtra("oldName");
 
-                Cursor c = this.getContentResolver().query(Data.CONTENT_URI,
+                Cursor c = resolver.query(Data.CONTENT_URI,
                         new String[]{Data.RAW_CONTACT_ID},
                         Contacts.DISPLAY_NAME + " =?",
                         new String[]{ oldName },null);
@@ -268,7 +276,7 @@ public class ContactListActivity extends AppCompatActivity {
                     ContentValues values = new ContentValues();
                     values.put(Phone.NUMBER,updatePhone);
                     values.put(Phone.TYPE, Phone.TYPE_MOBILE);
-                    this.getContentResolver().update(
+                    resolver.update(
                                     Data.CONTENT_URI,
                                     values,
                              Data.RAW_CONTACT_ID+" =?" +" AND "+ Data.MIMETYPE + " =?" ,
@@ -276,7 +284,7 @@ public class ContactListActivity extends AppCompatActivity {
 
                     values = new ContentValues();
                     values.put(Contacts.DISPLAY_NAME,updateName);
-                    this.getContentResolver().update(
+                    resolver.update(
                             RawContacts.CONTENT_URI,
                             values,Data.CONTACT_ID+" =?",
                             new String[]{contact_id});

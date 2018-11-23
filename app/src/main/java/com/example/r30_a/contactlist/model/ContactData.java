@@ -1,4 +1,4 @@
-package com.example.r30_a.contactlist;
+package com.example.r30_a.contactlist.model;
 
 /**
  * Created by R30-A on 2018/11/21.

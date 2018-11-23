@@ -27,6 +27,47 @@ public class UpdateDataActivity extends AppCompatActivity implements View.OnClic
         init();
     }
 
+    @Override
+    public void onClick(View v) {
+        final String updateName = edtName.getText().toString();
+        final String updatePhone = edtPhone.getText().toString();
+
+        if(updateName.equals(txvDataName.getText()) && updatePhone.equals(txvDataPhone.getText())) {
+            toast.setText(R.string.noUpdate);toast.show();
+        }else if(TextUtils.isEmpty(updateName) || TextUtils.isEmpty(updatePhone)){
+            toast.setText(R.string.wrongInput);toast.show();
+        }else {
+            if(ContactListActivity.isCellPhoneNumber(updatePhone)){
+                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.hint)
+                        .setMessage(R.string.sureToUpdate)
+                        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                Intent intent = new Intent();
+                                intent.putExtra("id",dataId);
+                                intent.putExtra("Name",updateName);
+                                intent.putExtra("Phone",updatePhone);
+                                intent.putExtra("oldName",txvDataName.getText());
+                                intent.setClass(UpdateDataActivity.this,ContactListActivity.class);
+                                setResult(RESULT_OK, intent);
+                                toast.setText(R.string.updateDataOK);toast.show();
+                                finish();
+
+                            }
+                        }).setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {}
+                }).create();
+
+                builder.show();
+            }else {
+                toast.setText(R.string.wrongInput);toast.show();
+            }
+        }
+    }
+
     private void init() {
         toast = Toast.makeText(this,"",Toast.LENGTH_SHORT);
         txvDataName = (TextView)findViewById(R.id.txvDataName);
@@ -42,45 +83,5 @@ public class UpdateDataActivity extends AppCompatActivity implements View.OnClic
         edtPhone = (EditText)findViewById(R.id.edtPhoneNumber);
         edtName.setText(intent.getStringExtra("name"));
         edtPhone.setText(intent.getStringExtra("phone"));
-    }
-
-    @Override
-    public void onClick(View v) {
-        final String updateName = edtName.getText().toString();
-        final String updatePhone = edtPhone.getText().toString();
-        if(updateName.equals(txvDataName.getText()) && updatePhone.equals(txvDataPhone.getText())) {
-            toast.setText(R.string.noUpdate);toast.show();
-        }else if(TextUtils.isEmpty(updateName) || TextUtils.isEmpty(updatePhone)){
-            toast.setText(R.string.wrongInput);toast.show();
-        }else {
-            if(ContactListActivity.isCellPhoneNumber(updatePhone)){
-            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(R.string.hint)
-                    .setMessage(R.string.sureToUpdate)
-                    .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                            Intent intent = new Intent();
-                            intent.putExtra("id",dataId);
-                            intent.putExtra("Name",updateName);
-                            intent.putExtra("Phone",updatePhone);
-                            intent.putExtra("oldName",txvDataName.getText());
-                            intent.setClass(UpdateDataActivity.this,ContactListActivity.class);
-                            setResult(RESULT_OK, intent);
-                            toast.setText(R.string.updateDataOK);toast.show();
-                            finish();
-
-                        }
-                    }).setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {}
-            }).create();
-
-            builder.show();
-            }else {
-                toast.setText(R.string.wrongInput);toast.show();
-            }
-        }
     }
 }

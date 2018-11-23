@@ -3,6 +3,7 @@
     <string name="hint">提示</string>
     <string name="sureToUpdate">確定要更新嗎?</string>
     <string name="noUpdate">未有更新資料！請重新輸入</string>
+    <string name="permissonRequest">請先開啟使用者權限</string>
     <string name="ContactName">名字</string>
     <string name="ContactPhone">手機</string>
     <string name="dial">打給他/她</string>
