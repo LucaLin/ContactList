@@ -3,6 +3,8 @@ package com.example.r30_a.contactlist;
 import android.Manifest;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.Data;
+import android.provider.ContactsContract.Contacts;
+import android.provider.ContactsContract.RawContacts;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -40,14 +42,11 @@ public class ContactListActivity extends AppCompatActivity {
     private ContactData contactData;
     public static final Uri SIM_URI = Uri.parse("content://icc/adn");//讀取sim卡資料的uri string
     String[] phoneNumberProjection = new String[]{//欲搜尋的欄位區塊
-            ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
-            ContactsContract.CommonDataKinds.Phone.NUMBER,
-            ContactsContract.Contacts.DISPLAY_NAME};
+            Phone.CONTACT_ID,
+            Phone.NUMBER,
+            Contacts.DISPLAY_NAME};
     String tempId = "";//聯絡人id的暫存
     public static final int REQUEST_CODE = 1;
-
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,16 +110,16 @@ public class ContactListActivity extends AppCompatActivity {
 
     private void deleteContact(String id) {
         try {
-            Uri uri = Uri.parse("content://com.android.contacts/raw_contacts");
+//            Uri uri = Uri.parse("content://com.android.contacts/raw_contacts");
             //使用id來找原始資料
-            Cursor c = this.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+            Cursor c = this.getContentResolver().query(Phone.CONTENT_URI,
                     phoneNumberProjection,
                     "contact_id =?",
                     new String[]{id},
                     null);
             if (c.moveToFirst()) {
 
-                this.getContentResolver().delete(uri, "contact_id =?", new String[]{id});
+                this.getContentResolver().delete(RawContacts.CONTENT_URI, "contact_id =?", new String[]{id});
                 toast.setText(R.string.deleteOK);
                 toast.show();
                 setAdapter(MainActivity.type);
@@ -250,27 +249,20 @@ public class ContactListActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE){
 
             if(resultCode == RESULT_OK){
+                String contact_id = data.getStringExtra("id");
                 String updateName = data.getStringExtra("Name");
                 String updatePhone = data.getStringExtra("Phone");
                 String oldName = data.getStringExtra("oldName");
 
                 Cursor c = this.getContentResolver().query(Data.CONTENT_URI,
                         new String[]{Data.RAW_CONTACT_ID},
-                        ContactsContract.Contacts.DISPLAY_NAME + " =?",
-                        new String[]{oldName},null);
+                        Contacts.DISPLAY_NAME + " =?",
+                        new String[]{ oldName },null);
 
                 c.moveToFirst();
-                String id = c.getString(c.getColumnIndex(Data.RAW_CONTACT_ID));
+                String raw_contact_id = c.getString(c.getColumnIndex(Data.RAW_CONTACT_ID));
                 c.close();
 
-//                Uri nameUri = Uri.parse("content://com.android.contacts/raw_contacts");
-//                Uri numberUri = Uri.parse("content://com.android.contacts/data");
-//                //使用id來找原始資料
-//                Cursor c = this.getContentResolver().query(numberUri,
-//                        phoneNumberProjection,
-//                        "contact_id =?",
-//                        new String[]{dataid},
-//                        null);
                 try{
 
                     ContentValues values = new ContentValues();
@@ -280,15 +272,18 @@ public class ContactListActivity extends AppCompatActivity {
                                     Data.CONTENT_URI,
                                     values,
                              Data.RAW_CONTACT_ID+" =?" +" AND "+ Data.MIMETYPE + " =?" ,
-                                    new String[]{id, Phone.CONTENT_ITEM_TYPE});
-//                    values = new ContentValues();
-//                    values.put(ContactsContract.Contacts.DISPLAY_NAME,updateName);
-//                    this.getContentResolver().update(nameUri,values,"contact_id =?",new String[]{dataid});
-//
+                                    new String[]{raw_contact_id, Phone.CONTENT_ITEM_TYPE});
+
+                    values = new ContentValues();
+                    values.put(Contacts.DISPLAY_NAME,updateName);
+                    this.getContentResolver().update(
+                            RawContacts.CONTENT_URI,
+                            values,Data.CONTACT_ID+" =?",
+                            new String[]{contact_id});
+
                 }catch (Exception e){
                     e.getMessage();
                 }
-
             }
         }
     }

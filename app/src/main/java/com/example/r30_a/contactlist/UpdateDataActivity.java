@@ -62,6 +62,7 @@ public class UpdateDataActivity extends AppCompatActivity implements View.OnClic
                         public void onClick(DialogInterface dialog, int which) {
 
                             Intent intent = new Intent();
+                            intent.putExtra("id",dataId);
                             intent.putExtra("Name",updateName);
                             intent.putExtra("Phone",updatePhone);
                             intent.putExtra("oldName",txvDataName.getText());
