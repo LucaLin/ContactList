@@ -40,16 +40,18 @@ public class UpdateDataActivity extends AppCompatActivity implements View.OnClic
         dataId = intent.getStringExtra("id");
         edtName = (EditText)findViewById(R.id.edtContactName);
         edtPhone = (EditText)findViewById(R.id.edtPhoneNumber);
+        edtName.setText(intent.getStringExtra("name"));
+        edtPhone.setText(intent.getStringExtra("phone"));
     }
 
     @Override
     public void onClick(View v) {
         final String updateName = edtName.getText().toString();
         final String updatePhone = edtPhone.getText().toString();
-        if(TextUtils.isEmpty(updateName) || TextUtils.isEmpty(updatePhone)) {
-            toast.setText(R.string.wrongInput);toast.show();
-        }else if(updateName.equals(txvDataName) && updatePhone.equals(txvDataPhone)){
+        if(updateName.equals(txvDataName.getText()) && updatePhone.equals(txvDataPhone.getText())) {
             toast.setText(R.string.noUpdate);toast.show();
+        }else if(TextUtils.isEmpty(updateName) || TextUtils.isEmpty(updatePhone)){
+            toast.setText(R.string.wrongInput);toast.show();
         }else {
             if(ContactListActivity.isCellPhoneNumber(updatePhone)){
             final AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -60,9 +62,9 @@ public class UpdateDataActivity extends AppCompatActivity implements View.OnClic
                         public void onClick(DialogInterface dialog, int which) {
 
                             Intent intent = new Intent();
-                            intent.putExtra("id",dataId);
                             intent.putExtra("Name",updateName);
                             intent.putExtra("Phone",updatePhone);
+                            intent.putExtra("oldName",txvDataName.getText());
                             intent.setClass(UpdateDataActivity.this,ContactListActivity.class);
                             setResult(RESULT_OK, intent);
                             toast.setText(R.string.updateDataOK);toast.show();

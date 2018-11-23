@@ -1,7 +1,8 @@
 package com.example.r30_a.contactlist;
 
 import android.Manifest;
-import android.app.Instrumentation;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.provider.ContactsContract.Data;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -37,7 +38,7 @@ public class ContactListActivity extends AppCompatActivity {
     private Cursor cursor;//搜尋資料的游標
     private HashMap contactMap = new HashMap();//用來儲存資料的物件
     private ContactData contactData;
-    public static final String SIM_CONTACT = "content://icc/adn";//讀取sim卡資料的uri string
+    public static final Uri SIM_URI = Uri.parse("content://icc/adn");//讀取sim卡資料的uri string
     String[] phoneNumberProjection = new String[]{//欲搜尋的欄位區塊
             ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
             ContactsContract.CommonDataKinds.Phone.NUMBER,
@@ -138,9 +139,9 @@ public class ContactListActivity extends AppCompatActivity {
     //獲取聯絡人清單資料
     private void setAdapter(int type) {
         if (type == 0) {//只顯示sim卡資料
-            adapter = new ContactsAdapter(this, getContactList(Uri.parse(SIM_CONTACT), phoneNumberProjection, 0, 1));
+            adapter = new ContactsAdapter(this, getContactList(SIM_URI, phoneNumberProjection, 0, 1));
         } else {//全部顯示
-            adapter = new ContactsAdapter(this, getContactList(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, phoneNumberProjection, 2, 1));
+            adapter = new ContactsAdapter(this, getContactList(Phone.CONTENT_URI, phoneNumberProjection, 2, 1));
         }
         myContactList.setAdapter(adapter);
     }
@@ -157,9 +158,10 @@ public class ContactListActivity extends AppCompatActivity {
         if (cursor != null) {
             while (cursor != null && cursor.moveToNext()) {
                 //抓取id用來判別是否有重覆資料抓取
-                String id = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
-                name = cursor.getString(nameColumn);
-                phoneNumber = cursor.getString(numColunm);
+
+                String id = cursor.getString(cursor.getColumnIndex(Phone.CONTACT_ID));
+                name = cursor.getString(cursor.getColumnIndex(Phone.DISPLAY_NAME));
+                phoneNumber = cursor.getString(cursor.getColumnIndex(Phone.NUMBER));
                 if (!TextUtils.isEmpty(phoneNumber) && !isCellPhoneNumber(phoneNumber)) {
                     continue;
                 } else {
@@ -248,29 +250,41 @@ public class ContactListActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE){
 
             if(resultCode == RESULT_OK){
-                String dataid = data.getStringExtra("id");
                 String updateName = data.getStringExtra("Name");
                 String updatePhone = data.getStringExtra("Phone");
+                String oldName = data.getStringExtra("oldName");
 
-                Uri nameUri = Uri.parse("content://com.android.contacts/raw_contacts");
-                Uri numberUri = Uri.parse("content://com.android.contacts/data");
-                //使用id來找原始資料
-                Cursor c = this.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                        phoneNumberProjection,
-                        "contact_id =?",
-                        new String[]{dataid},
-                        null);
+                Cursor c = this.getContentResolver().query(Data.CONTENT_URI,
+                        new String[]{Data.RAW_CONTACT_ID},
+                        ContactsContract.Contacts.DISPLAY_NAME + " =?",
+                        new String[]{oldName},null);
+
+                c.moveToFirst();
+                String id = c.getString(c.getColumnIndex(Data.RAW_CONTACT_ID));
+                c.close();
+
+//                Uri nameUri = Uri.parse("content://com.android.contacts/raw_contacts");
+//                Uri numberUri = Uri.parse("content://com.android.contacts/data");
+//                //使用id來找原始資料
+//                Cursor c = this.getContentResolver().query(numberUri,
+//                        phoneNumberProjection,
+//                        "contact_id =?",
+//                        new String[]{dataid},
+//                        null);
                 try{
-                if(c.moveToFirst()){
 
                     ContentValues values = new ContentValues();
-                    values.put(ContactsContract.CommonDataKinds.Phone.NUMBER,updatePhone);
-                    this.getContentResolver().update(numberUri,values,ContactsContract.CommonDataKinds.Phone.CONTACT_ID+" =" +dataid,null);
-                    values.clear();
-                    values.put(ContactsContract.Contacts.DISPLAY_NAME,updateName);
-                    this.getContentResolver().update(nameUri,values,"contact_id =?",new String[]{dataid});
-                    setAdapter(MainActivity.type);
-                    }
+                    values.put(Phone.NUMBER,updatePhone);
+                    values.put(Phone.TYPE, Phone.TYPE_MOBILE);
+                    this.getContentResolver().update(
+                                    Data.CONTENT_URI,
+                                    values,
+                             Data.RAW_CONTACT_ID+" =?" +" AND "+ Data.MIMETYPE + " =?" ,
+                                    new String[]{id, Phone.CONTENT_ITEM_TYPE});
+//                    values = new ContentValues();
+//                    values.put(ContactsContract.Contacts.DISPLAY_NAME,updateName);
+//                    this.getContentResolver().update(nameUri,values,"contact_id =?",new String[]{dataid});
+//
                 }catch (Exception e){
                     e.getMessage();
                 }
