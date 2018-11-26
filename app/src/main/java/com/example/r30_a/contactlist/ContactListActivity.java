@@ -27,7 +27,6 @@ import com.example.r30_a.contactlist.adapter.ContactsAdapter;
 import com.example.r30_a.contactlist.model.ContactData;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -117,12 +116,11 @@ public class ContactListActivity extends AppCompatActivity {
 
                 //使用id來找原始資料
                 Cursor c = resolver.query(Phone.CONTENT_URI,
-                        projection,
-                        "contact_id =?",
-                        new String[]{id},
-                        null);
+                                          projection,
+                                         "contact_id =?",
+                                          new String[]{id},
+                                         null);
                 if (c.moveToFirst()) {
-
                     resolver.delete(RawContacts.CONTENT_URI, "contact_id =?", new String[]{id});
                     toast.setText(R.string.deleteOK);
                     toast.show();
@@ -147,12 +145,17 @@ public class ContactListActivity extends AppCompatActivity {
         if (type == 0) {//只顯示sim卡資料
             adapter = new ContactsAdapter(this, getContactList(SIM_URI, phoneNumberProjection, 0, 1));
         } else {//全部顯示
-            adapter = new ContactsAdapter(this, getContactList(Phone.CONTENT_URI, phoneNumberProjection, 2, 1));
+            adapter = new ContactsAdapter(this,
+                    getContactList(Phone.CONTENT_URI, phoneNumberProjection, 2, 1));
         }
         ContactListView.setAdapter(adapter);
     }
 
-    private ArrayList getContactList(Uri uri, String[] projecction, int nameColumn, int numColunm) {
+    public ArrayList getList(){
+        return myContactList;
+    }
+
+    public ArrayList getContactList(Uri uri, String[] projecction, int nameColumn, int numColunm) {
         myContactList = new ArrayList();
         String name;
         String mobileNum;
@@ -166,8 +169,13 @@ public class ContactListActivity extends AppCompatActivity {
                 //抓取id用來判別是否有重覆資料抓取
 
                 String id = cursor.getString(cursor.getColumnIndex(Phone.CONTACT_ID));
-                name = cursor.getString(cursor.getColumnIndex(Phone.DISPLAY_NAME));
-                mobileNum = cursor.getString(cursor.getColumnIndex(Phone.NUMBER));
+                if(MainActivity.type == 0){
+                    name = cursor.getString(nameColumn);
+                    mobileNum = cursor.getString(numColunm);
+                }else {
+                    name = cursor.getString(cursor.getColumnIndex(Phone.DISPLAY_NAME));
+                    mobileNum = cursor.getString(cursor.getColumnIndex(Phone.NUMBER));
+                }
                 if (!TextUtils.isEmpty(mobileNum) && !isCellPhoneNumber(mobileNum)) {
                     continue;
                 } else {
@@ -181,7 +189,6 @@ public class ContactListActivity extends AppCompatActivity {
             toast.show();
             return myContactList;
         }
-
     }
     /*新增聯絡人到手機清單*/
     private void addContactToList(String id, String phoneNumber, String formatPhoneNum, String name, ArrayList list) {
@@ -276,8 +283,7 @@ public class ContactListActivity extends AppCompatActivity {
                     ContentValues values = new ContentValues();
                     values.put(Phone.NUMBER,updatePhone);
                     values.put(Phone.TYPE, Phone.TYPE_MOBILE);
-                    resolver.update(
-                                    Data.CONTENT_URI,
+                    resolver.update(Data.CONTENT_URI,
                                     values,
                              Data.RAW_CONTACT_ID+" =?" +" AND "+ Data.MIMETYPE + " =?" ,
                                     new String[]{raw_contact_id, Phone.CONTENT_ITEM_TYPE});
@@ -296,4 +302,3 @@ public class ContactListActivity extends AppCompatActivity {
         }
     }
 }
-

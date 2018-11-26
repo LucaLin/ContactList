@@ -4,7 +4,6 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.net.Uri;
-import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -65,24 +64,50 @@ public class AddContactActivity extends AppCompatActivity {
 
         ContentValues values = new ContentValues();
 
+        //建立一個空白ID供新增資料用
         Uri contactUri = resolver.insert(RawContacts.CONTENT_URI, values);
-
         long contactId = ContentUris.parseId(contactUri);
-        //新增Name
-        values.clear();
-        values.put(Data.RAW_CONTACT_ID, contactId );
-        values.put(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE);
-        values.put(StructuredName.GIVEN_NAME, name);
 
-        resolver.insert(Data.CONTENT_URI, values);
+        //新增Name
+        insertNameData(Data.RAW_CONTACT_ID, contactId,Data.MIMETYPE,
+                   StructuredName.CONTENT_ITEM_TYPE,
+                   StructuredName.GIVEN_NAME, name, Data.CONTENT_URI,values);
+
 
         //新增PhoneNum
+        insertData(Data.RAW_CONTACT_ID, contactId,
+                   Data.MIMETYPE,Phone.CONTENT_ITEM_TYPE,
+                   Phone.TYPE, Phone.TYPE_MOBILE,
+                   Phone.NUMBER, phoneNum, Data.CONTENT_URI, values);
+
+
+    }
+    //新增資料到聯絡人表格中
+    public void insertData(String rawContactIdColumn, long contactId,
+                           String MIMETYPE_column, String Content_Item_Type,
+                           String phoneType, int TypeMode,
+                           String dataColumn, String data,
+                           Uri uri, ContentValues values){
+
         values.clear();
-        values.put(Data.RAW_CONTACT_ID, contactId );
-        values.put(Data.MIMETYPE,Phone.CONTENT_ITEM_TYPE);
-        values.put(Phone.NUMBER, phoneNum);
-        values.put(Phone.TYPE,Phone.TYPE_MOBILE);
-        resolver.insert(Data.CONTENT_URI,values);
+        values.put(rawContactIdColumn, contactId );
+        values.put(MIMETYPE_column,Content_Item_Type);
+        values.put(phoneType,TypeMode);
+        values.put(dataColumn, data);
+        resolver.insert(uri,values);
+
+    }
+
+    public void insertNameData(String rawContactIdColumn, long contactId,
+                           String MIMETYPE_column, String Content_Item_Type,
+                           String dataColumn, String data,
+                           Uri uri, ContentValues values){
+
+        values.clear();
+        values.put(rawContactIdColumn, contactId );
+        values.put(MIMETYPE_column,Content_Item_Type);
+        values.put(dataColumn, data);
+        resolver.insert(uri,values);
 
     }
 

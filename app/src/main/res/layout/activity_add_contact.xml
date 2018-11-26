@@ -34,6 +34,7 @@
             android:layout_above="@+id/btnUpdate"
             android:layout_alignParentStart="false"
             android:ems="10"
+            android:maxLength="10"
             android:hint="輸入電話"
             android:inputType="phone" />
 
