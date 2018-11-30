@@ -22,10 +22,8 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
-
 import com.example.r30_a.contactlist.adapter.ContactsAdapter;
 import com.example.r30_a.contactlist.model.ContactData;
-
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -156,39 +154,46 @@ public class ContactListActivity extends AppCompatActivity {
     }
 
     public ArrayList getContactList(Uri uri, String[] projecction, int nameColumn, int numColunm) {
-        myContactList = new ArrayList();
-        String name;
-        String mobileNum;
-        String format_mobileNum = "";
+            myContactList = new ArrayList();
+        try {
 
-        cursor = resolver.query(uri, projecction, null, null, null);
+                String name;
+                    String mobileNum;
+                    String format_mobileNum = "";
 
-        //直接取contacts中的號碼資料區，再從號碼欄去抓對應的name跟number
-        if (cursor != null) {
-            while (cursor != null && cursor.moveToNext()) {
-                //抓取id用來判別是否有重覆資料抓取
+                    cursor = resolver.query(uri, projecction, null, null, null);
 
-                String id = cursor.getString(cursor.getColumnIndex(Phone.CONTACT_ID));
-                if(MainActivity.type == 0){
-                    name = cursor.getString(nameColumn);
-                    mobileNum = cursor.getString(numColunm);
-                }else {
-                    name = cursor.getString(cursor.getColumnIndex(Phone.DISPLAY_NAME));
-                    mobileNum = cursor.getString(cursor.getColumnIndex(Phone.NUMBER));
-                }
-                if (!TextUtils.isEmpty(mobileNum) && !isCellPhoneNumber(mobileNum)) {
-                    continue;
-                } else {
-                    addContactToList(id, mobileNum, format_mobileNum, name, myContactList);
-                }
+                    //直接取contacts中的號碼資料區，再從號碼欄去抓對應的name跟number
+                    if (cursor != null) {
+                        while (cursor != null && cursor.moveToNext()) {
+                            //抓取id用來判別是否有重覆資料抓取
+
+                            String id = cursor.getString(cursor.getColumnIndex(Phone.CONTACT_ID));
+                            if (MainActivity.type == 0) {
+                                name = cursor.getString(nameColumn);
+                                mobileNum = cursor.getString(numColunm);
+                            } else {
+                                name = cursor.getString(cursor.getColumnIndex(Phone.DISPLAY_NAME));
+                                mobileNum = cursor.getString(cursor.getColumnIndex(Phone.NUMBER));
+                            }
+                            if (!TextUtils.isEmpty(mobileNum) && !isCellPhoneNumber(mobileNum)) {
+                                continue;
+                            } else {
+                                addContactToList(id, mobileNum, format_mobileNum, name, myContactList);
+                            }
+                        }
+                        cursor.close();
+                        return myContactList;
+                    } else {
+                        toast.setText(R.string.noData);
+                        toast.show();
+                        return myContactList;
+                    }
+
+            }catch (Exception e){
+                e.getMessage();
             }
-            cursor.close();
-            return myContactList;
-        } else {
-            toast.setText(R.string.noData);
-            toast.show();
-            return myContactList;
-        }
+        return myContactList;
     }
     /*新增聯絡人到手機清單*/
     private void addContactToList(String id, String phoneNumber, String formatPhoneNum, String name, ArrayList list) {

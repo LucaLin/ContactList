@@ -20,10 +20,13 @@ import static com.example.r30_a.contactlist.ContactListActivity.isCellPhoneNumbe
 
 public class AddContactActivity extends AppCompatActivity {
 
+
+
     Toast toast;
     EditText edtName, edtPhomeNumber;//使用者編輯區
     Button btnAddContact;
     ContentResolver resolver;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +53,7 @@ public class AddContactActivity extends AppCompatActivity {
         });
     }
 
-    private void init() {
+    public void init() {
         toast = Toast.makeText(this, "",Toast.LENGTH_SHORT);
         resolver = this.getContentResolver();
 
@@ -60,27 +63,33 @@ public class AddContactActivity extends AppCompatActivity {
 
     }
 
-    private void insertContact(String name, String phoneNum) {
 
-        ContentValues values = new ContentValues();
+    public boolean insertContact(String name, String phoneNum) {
 
-        //建立一個空白ID供新增資料用
-        Uri contactUri = resolver.insert(RawContacts.CONTENT_URI, values);
-        long contactId = ContentUris.parseId(contactUri);
+        try {
+            ContentValues values = new ContentValues();
 
-        //新增Name
-        insertNameData(Data.RAW_CONTACT_ID, contactId,Data.MIMETYPE,
-                   StructuredName.CONTENT_ITEM_TYPE,
-                   StructuredName.GIVEN_NAME, name, Data.CONTENT_URI,values);
+            //建立一個空白ID供新增資料用
+            Uri contactUri = resolver.insert(RawContacts.CONTENT_URI, values);
+            long contactId = ContentUris.parseId(contactUri);
 
-
-        //新增PhoneNum
-        insertData(Data.RAW_CONTACT_ID, contactId,
-                   Data.MIMETYPE,Phone.CONTENT_ITEM_TYPE,
-                   Phone.TYPE, Phone.TYPE_MOBILE,
-                   Phone.NUMBER, phoneNum, Data.CONTENT_URI, values);
+            //新增Name
+            insertNameData(Data.RAW_CONTACT_ID, contactId, Data.MIMETYPE,
+                    StructuredName.CONTENT_ITEM_TYPE,
+                    StructuredName.GIVEN_NAME, name, Data.CONTENT_URI, values);
 
 
+            //新增PhoneNum
+            insertData(Data.RAW_CONTACT_ID, contactId,
+                    Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE,
+                    Phone.TYPE, Phone.TYPE_MOBILE,
+                    Phone.NUMBER, phoneNum, Data.CONTENT_URI, values);
+
+        }catch (Exception e){
+            e.getMessage();
+            return false;
+        }
+        return true;
     }
     //新增資料到聯絡人表格中
     public void insertData(String rawContactIdColumn, long contactId,
@@ -98,7 +107,7 @@ public class AddContactActivity extends AppCompatActivity {
 
     }
 
-    public void insertNameData(String rawContactIdColumn, long contactId,
+    public boolean insertNameData(String rawContactIdColumn, long contactId,
                            String MIMETYPE_column, String Content_Item_Type,
                            String dataColumn, String data,
                            Uri uri, ContentValues values){
@@ -108,7 +117,7 @@ public class AddContactActivity extends AppCompatActivity {
         values.put(MIMETYPE_column,Content_Item_Type);
         values.put(dataColumn, data);
         resolver.insert(uri,values);
-
+        return true;
     }
 
 

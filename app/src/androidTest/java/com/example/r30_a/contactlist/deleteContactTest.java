@@ -63,15 +63,11 @@ public class deleteContactTest {
                                 2)));
         appCompatButton2.perform(scrollTo(), click());
         try {
-//        DataInteraction linearLayout =
-                onData(
-                (allOf(is(instanceOf(ContactData.class)),myListMatcher("youyou")))).perform(click());
-//                        childAtPosition(
-//                                withClassName(is("android.widget.RelativeLayout")),
-//                                36);
 
 
-            //linearLayout.perform(scrollTo(),click());
+//                onData(allOf(instanceOf(ContactData.class),myListMatcher("youyou")));
+            onData(anything()).inAdapterView(withId(R.id.ContactList)).atPosition(35).perform(click());
+            //LIST大小會變動，atPosition要再想想
 
         }catch (Exception e){
             e.getMessage();
@@ -84,7 +80,7 @@ public class deleteContactTest {
                                         withId(R.id.buttonPanel),
                                         0),
                                 3)));
-        appCompatButton3.perform(scrollTo(), click());
+        appCompatButton3.perform(click());
 
     }
 
@@ -111,13 +107,14 @@ public class deleteContactTest {
         return new BoundedMatcher<Object,ContactData>(ContactData.class) {
             @Override
             public void describeTo(Description description) {
-                description.appendText("SearchItem has Name: " + name);
+//                description.appendText("SearchItem has Name: " + name);
             }
 
             @Override
             protected boolean matchesSafely(ContactData item) {
-                boolean s =  item != null && !TextUtils.isEmpty(item.getName()) && item.getName().equals(name);
-               return item != null && !TextUtils.isEmpty(item.getName()) && item.getName().equals(name);
+//                boolean s =  item != null && !TextUtils.isEmpty(item.getName()) && item.getName().equals(name);
+//               return item != null && !TextUtils.isEmpty(item.getName()) &&
+                       return item.getName().equals(name);
             }
         };
     }

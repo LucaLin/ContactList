@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">ContactList</string>
+    <string name="permissionDenied">請先至系統設定開啟相關權限後再回來使用喔！</string>
     <string name="hint">提示</string>
     <string name="sureToUpdate">確定要更新嗎?</string>
     <string name="noUpdate">未有更新資料！請重新輸入</string>
