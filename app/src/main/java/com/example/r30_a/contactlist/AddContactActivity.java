@@ -7,6 +7,8 @@ import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,13 +22,10 @@ import static com.example.r30_a.contactlist.ContactListActivity.isCellPhoneNumbe
 
 public class AddContactActivity extends AppCompatActivity {
 
-
-
     Toast toast;
     EditText edtName, edtPhomeNumber;//使用者編輯區
     Button btnAddContact;
     ContentResolver resolver;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,11 +55,9 @@ public class AddContactActivity extends AppCompatActivity {
     public void init() {
         toast = Toast.makeText(this, "",Toast.LENGTH_SHORT);
         resolver = this.getContentResolver();
-
         edtName = (EditText)findViewById(R.id.edtContactName);
         edtPhomeNumber = (EditText)findViewById(R.id.edtPhoneNumber);
         btnAddContact = (Button)findViewById(R.id.btnUpdate);
-
     }
 
 

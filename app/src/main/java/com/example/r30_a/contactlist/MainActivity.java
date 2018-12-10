@@ -23,7 +23,6 @@ public class MainActivity extends AppCompatActivity {
 
     Button btnGotoContact;
     public static int type;
-    Toast toast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
